@@ -14,9 +14,12 @@ public class NotificationCenter: MonoBehaviour {
 
 	public void AddHandler(string notificationName, NotificationHandler handler) {
 
-		List<NotificationHandler> handlers = table[notificationName];
+		List<NotificationHandler> handlers;
 
-		if (handlers == null) {
+		if (table.ContainsKey(notificationName)) {
+			handlers = table[notificationName];
+		}
+		else {
 			handlers = new List<NotificationHandler>();
 			table[notificationName] = handlers;
 		}
@@ -42,11 +45,11 @@ public class NotificationCenter: MonoBehaviour {
 
 	private void BroadcastNotification(Notification notification) {
 
-		List<NotificationHandler> handlers = table[notification.name];
-
-		if (handlers == null) {
+		if (!table.ContainsKey(notification.name)) {
 			return;
 		}
+
+		List<NotificationHandler> handlers = table[notification.name];
 
 		foreach (NotificationHandler handler in handlers) {
 			handler(notification);

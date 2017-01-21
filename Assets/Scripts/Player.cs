@@ -16,7 +16,7 @@ public class Player : MonoBehaviour {
 
 	private CharacterController character;
 
-
+   
 	private float hitPoint = 0.0f;
 	private float stunPoint = 0.0f;
 	private float stunRegen = 0.0f;
@@ -37,9 +37,10 @@ public class Player : MonoBehaviour {
 	private StateMachine locomotion = new StateMachine();
 	private StateMachine jumping = new StateMachine();
 	private StateMachine firing = new StateMachine();
+    private StateMachine gettinghit = new StateMachine();
 
 	void Awake() {
-
+        
 		character = GetComponent<CharacterController>();
 
 		{
@@ -121,7 +122,23 @@ public class Player : MonoBehaviour {
 
 			firing.AddState(state);
 		}
-	}
+
+        {
+            State state = new State("getHit");
+            state.OnBegin += GetHit_OnBegin;
+            state.OnUpdate += GetHit_OnUpdate;
+
+            gettinghit.AddState(state);
+        }
+
+        {
+            State state = new State("notHit");
+            state.OnBegin += NotHit_OnBegin;
+            state.OnUpdate += NotHit_OnUpdate;
+
+            gettinghit.AddState(state);
+        }
+    }
 
 	void Start () {
 		activity.BeginState("alive");
@@ -146,18 +163,25 @@ public class Player : MonoBehaviour {
 					locomotion.BeginState("idle");
 				}
 
-				if (Input.GetKeyDown(inputConfig.fire)) {
-					firing.BeginState("openFire");
-				}
+                if (gettinghit.currentState.name == "notHit")
+                {
+                    if (Input.GetKeyDown(inputConfig.fire))
+                    {
+                        firing.BeginState("openFire");
+                    }
 
-				if (Input.GetKeyUp(inputConfig.fire)) {
-					firing.BeginState("ceaseFire");
-				}
+                    if (Input.GetKeyUp(inputConfig.fire))
+                    {
+                        firing.BeginState("ceaseFire");
+                    }
+                }
+              
 			}
 
 			locomotion.Update(Time.deltaTime);
 			jumping.Update(Time.deltaTime);
 			firing.Update(Time.deltaTime);
+            gettinghit.Update(Time.deltaTime);
 
 			UpdateMovement();
 			UpdateInertia();
@@ -197,6 +221,7 @@ public class Player : MonoBehaviour {
 		locomotion.BeginState("idle");
 		jumping.BeginState("grounded");
 		firing.BeginState("ceaseFire");
+        gettinghit.BeginState("notHit");
 	}
 
 	void Alive_OnUpdate(State state) {
@@ -311,7 +336,7 @@ public class Player : MonoBehaviour {
 	}
 
 	void CeaseFire_OnBegin(State state) {
-
+        
 	}
 
 	void CeaseFire_OnUpdate(State state) {
@@ -334,7 +359,33 @@ public class Player : MonoBehaviour {
 		}
 	}
 
-	bool CheckGrounded() {
+
+    void GetHit_OnBegin(State state)
+    {
+       firing.BeginState("ceaseFire");
+    }
+
+    void GetHit_OnUpdate(State state)
+    {
+        print(state.elapsedTime);
+        if (state.elapsedTime > GameConfig.shared.hitDelay)
+        {
+            gettinghit.BeginState("notHit");
+
+
+        }
+    }
+
+    void NotHit_OnBegin(State state){
+        
+    }
+
+    void NotHit_OnUpdate(State state)
+    {
+
+    }
+
+    bool CheckGrounded() {
 		
 		Vector3 origin = character.transform.position;
 		float length = character.height * 0.55f;
@@ -422,7 +473,7 @@ public class Player : MonoBehaviour {
 		else if (lookAt == LookAt.Right) {
 			direction = Vector3.right;
 		}
-
+         
 		origin += direction;
 
 		GameObject go = GameObject.Instantiate(bulletPrefab.gameObject, origin, Quaternion.identity);
@@ -439,7 +490,10 @@ public class Player : MonoBehaviour {
 
 		if (currentHitPoint <= 0.0f) {
 			activity.BeginState("dead");
-		}
+        }else
+        {
+            gettinghit.BeginState("getHit");
+        }
 
 		currentStunPoint -= bullet.bulletStunDamage;
 		
