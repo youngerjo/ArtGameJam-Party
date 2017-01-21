@@ -8,7 +8,9 @@ public class LevelSceneManager : MonoBehaviour {
 	public ProgressBar player2HpBar;
 	public Inventory player1Inventory;
 	public Inventory player2Inventory;
-	
+	public Renderer vsRenderer;
+
+	private int itemCount = 0;
 
 	// Use this for initialization
 	void Start () {
@@ -36,11 +38,26 @@ public class LevelSceneManager : MonoBehaviour {
 
 	void OnPlayer1GetItem(Notification notification) {
 		Item item = notification.userInfo as Item;
-		player1Inventory.AddItem(item);
+		
+		if (player1Inventory.AddItem(item)) {
+			OnAnyPlayerGetItem();
+		}
 	}
 
 	void OnPlayer2GetItem(Notification notification) {
 		Item item = notification.userInfo as Item;
-		player2Inventory.AddItem(item);		
+
+		if (player2Inventory.AddItem(item)) {
+			OnAnyPlayerGetItem();
+		}
+	}
+
+	void OnAnyPlayerGetItem() {
+		itemCount++;
+
+		float alpha = (float)(Mathf.Max(0, 5 - itemCount) / 5.0f);
+		Color color = new Color(1.0f, 1.0f, 1.0f, alpha);
+		
+		vsRenderer.material.SetColor("_TintColor", color);
 	}
 }
