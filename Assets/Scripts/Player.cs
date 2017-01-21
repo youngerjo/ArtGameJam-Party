@@ -38,10 +38,12 @@ public class Player : MonoBehaviour {
 	private StateMachine jumping = new StateMachine();
 	private StateMachine firing = new StateMachine();
     private StateMachine gettinghit = new StateMachine();
+    private Animator animator;
 
 	void Awake() {
         
 		character = GetComponent<CharacterController>();
+        animator = transform.FindChild("Sprite").GetComponent<Animator>();
 
 		{
 			State state = new State("alive");
@@ -237,7 +239,7 @@ public class Player : MonoBehaviour {
 	}
 
 	void Idle_OnBegin(State state) {
-
+        animator.SetBool("idle", false);
 	}
 
 	void Idle_OnUpdate(State state) {
@@ -251,11 +253,12 @@ public class Player : MonoBehaviour {
 		}
 		else if (moveLeft || moveRight) {
 			locomotion.BeginState("move");
-		}
+
+        }
 	}
 
 	void Move_OnBegin(State state) {
-
+        
 	}
 
 	void Move_OnUpdate(State state) {
@@ -272,12 +275,26 @@ public class Player : MonoBehaviour {
 		}
 		else if (moveLeft) {
 			lookAt = LookAt.Left;
+            if(transform.FindChild("Sprite").transform.localScale.x != 1)
+            {
+                Vector3 scale = transform.FindChild("Sprite").transform.localScale;
+                scale.x *= -1;
+                transform.FindChild("Sprite").transform.localScale = scale;
+            }
 		}
 		else if (moveRight) {
 			lookAt = LookAt.Right;
-		}
+            if (transform.FindChild("Sprite").transform.localScale.x != -1)
+            {
+                Vector3 scale = transform.FindChild("Sprite").transform.localScale;
+                scale.x *= -1;
+                transform.FindChild("Sprite").transform.localScale = scale;
+            }
+        }
 		else {
-			locomotion.BeginState("idle");
+
+                locomotion.BeginState("idle"); 
+                    
 		}
 	}
 
@@ -309,41 +326,60 @@ public class Player : MonoBehaviour {
 	}
 
 	void Grounded_OnBegin(State state) {
+       // animator.SetBool("idle", false);
+        // if (locomotion.currentState.name!="idle" && ) {
 
-	}
+        // }
+    }
 
 	void Grounded_OnUpdate(State state) {
 
-		if (Input.GetKeyDown(inputConfig.jump) && state.elapsedTime > 0.1f) {
+        if (animator.GetBool("idle"))
+        {
+            animator.SetBool("idle", false);
+        }
 
+		if (Input.GetKeyDown(inputConfig.jump) && state.elapsedTime > 0.1f) {
+            
 			inertia += Vector3.up * jumpPower;
 			jumping.BeginState("hover");
-		}
+            animator.SetBool("jump", true);
+        }
+
 		else if (!CheckGrounded()) {
-			jumping.BeginState("hover");
+            animator.SetBool("hover", true);
+            jumping.BeginState("hover");
 		}
 	}
 
 	void Hover_OnBegin(State state) {
-		
-	}
+        if (firing.currentState.name != "openFire")
+        {
+           
+        }
+    }
 
 	void Hover_OnUpdate(State state) {
 
 		if (inertia.y <= 0.0f && CheckGrounded()) {
 			jumping.BeginState("grounded");
-		}
+            animator.SetBool("jump", false);
+            animator.SetBool("hover", false);
+            animator.SetBool("idle", true);
+        }
 	}
 
 	void CeaseFire_OnBegin(State state) {
-        
-	}
+        animator.SetBool("stopfire", true);
+    }
 
 	void CeaseFire_OnUpdate(State state) {
 		
 	}
 
 	void OpenFire_OnBegin(State state) {
+        animator.SetBool("stopfire", false);
+        //animator.SetTrigger("fire");
 		ShootBullet();
 	}
 
@@ -353,21 +389,27 @@ public class Player : MonoBehaviour {
 			ShootBullet();
 			state.ResetTime();
 		}
-
-		if (Input.GetKeyUp(inputConfig.fire)) {
-			firing.BeginState("ceaseFire");
-		}
+        
+        if (Input.GetKeyUp(inputConfig.fire))
+        {
+            print("CEASE!");
+            
+            firing.BeginState("ceaseFire");
+            
+        }
 	}
 
 
     void GetHit_OnBegin(State state)
     {
-       firing.BeginState("ceaseFire");
+        animator.SetTrigger("attacked");
+        firing.BeginState("ceaseFire");
+
     }
 
     void GetHit_OnUpdate(State state)
     {
-        print(state.elapsedTime);
+
         if (state.elapsedTime > GameConfig.shared.hitDelay)
         {
             gettinghit.BeginState("notHit");
@@ -397,13 +439,15 @@ public class Player : MonoBehaviour {
 	}
 
 	void UpdateMovement() {
-
+       
 		if (locomotion.currentState.name == "move") {
+
 
 			if (Input.GetKey(inputConfig.moveLeft)) {
 
 				currentMoveVelocity -= moveAccel * Time.deltaTime;
 				currentMoveVelocity = Mathf.Max(currentMoveVelocity, -moveSpeed);
+
 			}
 
 			if (Input.GetKey(inputConfig.moveRight)) {
@@ -413,7 +457,7 @@ public class Player : MonoBehaviour {
 			}
 		}
 		else {
-
+            
 			if (currentMoveVelocity < 0.0f) {
 
 				currentMoveVelocity += moveDecel * Time.deltaTime;
@@ -424,6 +468,7 @@ public class Player : MonoBehaviour {
 				currentMoveVelocity -= moveDecel * Time.deltaTime;
 				currentMoveVelocity = Mathf.Max(currentMoveVelocity, 0.0f);
 			}
+
 		}
 
 		Vector3 planarVelocity = new Vector3(currentMoveVelocity, 0.0f, 0.0f);
@@ -432,7 +477,8 @@ public class Player : MonoBehaviour {
 		Vector3 deltaPosition = velocity * Time.deltaTime;
 		
 		character.Move(deltaPosition);
-	}
+        animator.SetFloat("vel", Mathf.Abs(currentMoveVelocity));
+    }
 
 	void UpdateInertia() {
 
