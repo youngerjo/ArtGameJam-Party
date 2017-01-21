@@ -510,6 +510,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerFall: {fileID: 215403545}
   background: {fileID: 1776001911}
+  blackOut: {fileID: 1241688926}
 --- !u!4 &1263802465
 Transform:
   m_ObjectHideFlags: 0
