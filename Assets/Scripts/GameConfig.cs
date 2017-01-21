@@ -25,4 +25,5 @@ public class GameConfig : MonoBehaviour {
 	public float bulletStunDamage = 20.0f;
 	public float hitPower = 100.0f;
 	public float itemChance = 0.1f;
+    public float hitDelay = 0.25f;
 }
