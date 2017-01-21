@@ -1431,6 +1431,41 @@ Prefab:
       propertyPath: m_RootOrder
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 1706856294205380, guid: d264510d1ff404c6a8be701d54d1982f, type: 2}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1829733780175824, guid: d264510d1ff404c6a8be701d54d1982f, type: 2}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1117966067166118, guid: d264510d1ff404c6a8be701d54d1982f, type: 2}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1117966067166118, guid: d264510d1ff404c6a8be701d54d1982f, type: 2}
+      propertyPath: m_Name
+      value: Player1 Input
+      objectReference: {fileID: 0}
+    - target: {fileID: 1829733780175824, guid: d264510d1ff404c6a8be701d54d1982f, type: 2}
+      propertyPath: m_Name
+      value: Player2 Input
+      objectReference: {fileID: 0}
+    - target: {fileID: 114165391085613452, guid: d264510d1ff404c6a8be701d54d1982f,
+        type: 2}
+      propertyPath: coolTime
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 114165391085613452, guid: d264510d1ff404c6a8be701d54d1982f,
+        type: 2}
+      propertyPath: bulletPower
+      value: 600
+      objectReference: {fileID: 0}
+    - target: {fileID: 114165391085613452, guid: d264510d1ff404c6a8be701d54d1982f,
+        type: 2}
+      propertyPath: bulletLife
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: d264510d1ff404c6a8be701d54d1982f, type: 2}
   m_IsPrefabParent: 0

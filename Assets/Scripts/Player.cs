@@ -31,6 +31,7 @@ public class Player : MonoBehaviour {
 	private float currentHitPoint = 0.0f;
 	private float currentStunPoint = 0.0f;
 	private float currentMoveVelocity = 0.0f;
+	private float currentCoolTime = 0.0f;
 	private Vector3 inertia = Vector3.zero;
 
 	private StateMachine activity = new StateMachine();
@@ -217,6 +218,7 @@ public class Player : MonoBehaviour {
 		currentHitPoint = hitPoint;
 		currentStunPoint = hitPoint;
 		currentMoveVelocity = 0.0f;
+		currentCoolTime = coolTime;
 
 		locomotion.BeginState("idle");
 		jumping.BeginState("grounded");
@@ -349,9 +351,11 @@ public class Player : MonoBehaviour {
 
 	void OpenFire_OnUpdate(State state) {
 
-		if (state.elapsedTime > coolTime) {
+		if (state.elapsedTime > currentCoolTime) {
 			ShootBullet();
 			state.ResetTime();
+
+			currentCoolTime = coolTime * Random.Range(0.5f, 1.5f);
 		}
 
 		if (Input.GetKeyUp(inputConfig.fire)) {
@@ -465,6 +469,8 @@ public class Player : MonoBehaviour {
 	private void ShootBullet() {
 
 		Vector3 origin = transform.position + Vector3.up * 0.5f;
+		origin.y += Random.Range(-1.0f, 1.0f) * 0.5f;
+
 		Vector3 direction = Vector3.zero;
 
 		if (lookAt == LookAt.Left) {
