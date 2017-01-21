@@ -237,6 +237,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scroller: {fileID: 943109860}
+  credit: {fileID: 605644831}
+  logo: {fileID: 713910071}
 --- !u!4 &519174111
 Transform:
   m_ObjectHideFlags: 0
@@ -262,7 +264,7 @@ GameObject:
   - component: {fileID: 605644833}
   - component: {fileID: 605644832}
   m_Layer: 0
-  m_Name: Title
+  m_Name: Credit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -344,7 +346,7 @@ GameObject:
   - component: {fileID: 713910073}
   - component: {fileID: 713910072}
   m_Layer: 0
-  m_Name: Text (4)
+  m_Name: Logo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -357,7 +359,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 713910070}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -34.5, z: 0}
+  m_LocalPosition: {x: 0, y: -42, z: 0}
   m_LocalScale: {x: 32, y: 5, z: 1}
   m_Children: []
   m_Father: {fileID: 943109860}
@@ -491,8 +493,8 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 943109859}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -10, z: 5}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: -6, z: 5}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 1}
   m_Children:
   - {fileID: 1812235470}
   - {fileID: 1854264971}
@@ -513,7 +515,7 @@ GameObject:
   - component: {fileID: 1192520458}
   - component: {fileID: 1192520457}
   m_Layer: 0
-  m_Name: Text (2)
+  m_Name: Programming
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -712,7 +714,7 @@ GameObject:
   - component: {fileID: 1574032544}
   - component: {fileID: 1574032543}
   m_Layer: 0
-  m_Name: Text (3)
+  m_Name: Music
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -780,7 +782,7 @@ GameObject:
   - component: {fileID: 1812235472}
   - component: {fileID: 1812235471}
   m_Layer: 0
-  m_Name: Text
+  m_Name: Game Design
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -848,7 +850,7 @@ GameObject:
   - component: {fileID: 1854264973}
   - component: {fileID: 1854264972}
   m_Layer: 0
-  m_Name: Text (1)
+  m_Name: Art
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
