@@ -45,6 +45,8 @@ public class NotificationCenter: MonoBehaviour {
 
 	private void BroadcastNotification(Notification notification) {
 
+		Debug.Log("Broadcasting notification: " + notification.name);
+
 		if (!table.ContainsKey(notification.name)) {
 			return;
 		}

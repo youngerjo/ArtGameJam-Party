@@ -371,7 +371,6 @@ public class Player : MonoBehaviour {
 
     void GetHit_OnUpdate(State state)
     {
-        print(state.elapsedTime);
         if (state.elapsedTime > GameConfig.shared.hitDelay)
         {
             gettinghit.BeginState("notHit");
@@ -492,14 +491,35 @@ public class Player : MonoBehaviour {
 
 	private void TakeDamageFromBullet(Bullet bullet) {
 
+		if (activity.currentState.name != "alive") {
+			return;
+		}
+
 		currentHitPoint -= bullet.bulletDamage;
 
 		if (currentHitPoint <= 0.0f) {
 			activity.BeginState("dead");
-        }else
-        {
-            gettinghit.BeginState("getHit");
-        }
+		}
+		else {
+			gettinghit.BeginState("getHit");
+		}
+
+		string playerName = LayerMask.LayerToName(gameObject.layer);
+
+		{
+			string notificationName = playerName + "Hit";
+			float hitPointRatio = currentHitPoint / hitPoint;
+
+			Notification notification = new Notification(notificationName, hitPointRatio);
+			NotificationCenter.shared.PostNotification(notification);
+		}
+
+		if (bullet.item != null) {
+			string notificationName = playerName + "GetItem";
+
+			Notification notification = new Notification(notificationName, bullet.item);
+			NotificationCenter.shared.PostNotification(notification);
+		}
 
 		currentStunPoint -= bullet.bulletStunDamage;
 		
