@@ -139,7 +139,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputConfig: {fileID: 0}
-  bulletPrefab: {fileID: 114174622626444436, guid: 610c802db1256484095731938a3038b6,
+  bulletPrefab: {fileID: 114868485883048250, guid: 28d149548b4f54d8496b30e21bdaf09a,
     type: 2}
   lookAt: 0
 --- !u!136 &136773813297596586
