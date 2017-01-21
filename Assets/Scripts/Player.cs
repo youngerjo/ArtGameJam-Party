@@ -5,6 +5,15 @@ using UnityEngine;
 public class Player : MonoBehaviour {
 
 	public InputConfig inputConfig;
+	public Bullet bulletPrefab;
+
+	public enum LookAt {
+		Left,
+		Right
+	}
+
+	public LookAt lookAt = LookAt.Left;
+
 	private CharacterController character;
 
 
@@ -13,6 +22,8 @@ public class Player : MonoBehaviour {
 	private float moveAccel = 0;
 	private float moveDecel = 0;
 	private float jumpPower = 0;
+	private float coolTime = 0;
+	private float bulletPower = 0;
 
 	private float currentMoveVelocity = 0.0f;
 	private Vector3 inertia = Vector3.zero;
@@ -72,6 +83,7 @@ public class Player : MonoBehaviour {
 		{
 			State state = new State("ceaseFire");
 			state.OnBegin += CeaseFire_OnBegin;
+			state.OnUpdate += CeaseFire_OnUpdate;
 			state.OnEnd += CeaseFire_OnEnd;
 
 			firing.AddState(state);
@@ -80,6 +92,7 @@ public class Player : MonoBehaviour {
 		{
 			State state = new State("openFire");
 			state.OnBegin += OpenFire_OnBegin;
+			state.OnUpdate += OpenFire_OnUpdate;
 			state.OnEnd += OpenFire_OnEnd;
 
 			firing.AddState(state);
@@ -93,6 +106,8 @@ public class Player : MonoBehaviour {
 		moveAccel = GameConfig.shared.moveAccel;
 		moveDecel = GameConfig.shared.moveDecel;
 		jumpPower = GameConfig.shared.jumpPower;
+		coolTime = GameConfig.shared.coolTime;
+		bulletPower = GameConfig.shared.bulletPower;
 
 		locomotion.BeginState("idle");
 		jumping.BeginState("grounded");
@@ -154,10 +169,16 @@ public class Player : MonoBehaviour {
 		bool moveLeft = Input.GetKey(inputConfig.moveLeft);
 		bool moveRight = Input.GetKey(inputConfig.moveRight);
 		
-		if (!CheckGrounded()) {
-			jumping.BeginState("hover");
+		if (moveLeft && moveRight) {
+			// Pressing both keys. Do nothing
 		}
-		else if (!moveLeft && !moveRight) {
+		else if (moveLeft) {
+			lookAt = LookAt.Left;
+		}
+		else if (moveRight) {
+			lookAt = LookAt.Right;
+		}
+		else {
 			locomotion.BeginState("idle");
 		}
 	}
@@ -185,6 +206,9 @@ public class Player : MonoBehaviour {
 			inertia += Vector3.up * jumpPower;
 			jumping.BeginState("hover");
 		}
+		else if (!CheckGrounded()) {
+			jumping.BeginState("hover");
+		}
 	}
 
 	void Grounded_OnEnd(State state) {
@@ -210,12 +234,31 @@ public class Player : MonoBehaviour {
 
 	}
 
+	void CeaseFire_OnUpdate(State state) {
+		
+		if (Input.GetKeyDown(inputConfig.fire)) {
+			firing.BeginState("openFire");
+		}
+	}
+
 	void CeaseFire_OnEnd(State state) {
 
 	}
 
 	void OpenFire_OnBegin(State state) {
+		InstantiateBullet();
+	}
 
+	void OpenFire_OnUpdate(State state) {
+
+		if (state.elapsedTime > coolTime) {
+			InstantiateBullet();
+			state.ResetTime();
+		}
+
+		if (Input.GetKeyUp(inputConfig.fire)) {
+			firing.BeginState("ceaseFire");
+		}
 	}
 
 	void OpenFire_OnEnd(State state) {
@@ -291,5 +334,23 @@ public class Player : MonoBehaviour {
 		else {
 			Physics.IgnoreLayerCollision(gameObject.layer, platform, false);
 		}
+	}
+
+	private void InstantiateBullet() {
+
+		Vector3 origin = transform.position + Vector3.up * 0.5f;
+		Vector3 direction = Vector3.zero;
+
+		if (lookAt == LookAt.Left) {
+			direction = Vector3.left;
+		}
+		else if (lookAt == LookAt.Right) {
+			direction = Vector3.right;
+		}
+
+		origin += direction;
+
+		GameObject go = GameObject.Instantiate(bulletPrefab.gameObject, origin, Quaternion.identity);
+		go.GetComponent<Rigidbody>().AddForce(direction * bulletPower);
 	}
 }

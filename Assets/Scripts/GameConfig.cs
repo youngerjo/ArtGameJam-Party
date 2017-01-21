@@ -16,4 +16,7 @@ public class GameConfig : MonoBehaviour {
 	public float moveAccel = 10;
 	public float moveDecel = 20;
 	public float jumpPower = 10;
+	public float coolTime = 0.5f;
+	public float bulletPower = 1000.0f;
+	public float bulletLife = 1.0f;
 }

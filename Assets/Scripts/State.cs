@@ -37,4 +37,8 @@ public class State {
   public void End() {
     OnEnd(this);
   }
+
+  public void ResetTime() {
+    _elapsedTime = 0.0f;
+  }
 }
