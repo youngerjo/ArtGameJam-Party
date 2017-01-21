@@ -17,17 +17,23 @@ public class Player : MonoBehaviour {
 	private CharacterController character;
 
 
-	private float hitPoint = 0;
-	private float moveSpeed = 0;
-	private float moveAccel = 0;
-	private float moveDecel = 0;
-	private float jumpPower = 0;
-	private float coolTime = 0;
-	private float bulletPower = 0;
+	private float hitPoint = 0.0f;
+	private float stunPoint = 0.0f;
+	private float stunRegen = 0.0f;
+	private float moveSpeed = 0.0f;
+	private float moveAccel = 0.0f;
+	private float moveDecel = 0.0f;
+	private float jumpPower = 0.0f;
+	private float coolTime = 0.0f;
+	private float bulletPower = 0.0f;
+	private float hitPower = 0.0f;
 
+	private float currentHitPoint = 0.0f;
+	private float currentStunPoint = 0.0f;
 	private float currentMoveVelocity = 0.0f;
 	private Vector3 inertia = Vector3.zero;
 
+	private StateMachine activity = new StateMachine();
 	private StateMachine locomotion = new StateMachine();
 	private StateMachine jumping = new StateMachine();
 	private StateMachine firing = new StateMachine();
@@ -37,10 +43,25 @@ public class Player : MonoBehaviour {
 		character = GetComponent<CharacterController>();
 
 		{
+			State state = new State("alive");
+			state.OnBegin += Alive_OnBegin;
+			state.OnUpdate += Alive_OnUpdate;
+
+			activity.AddState(state);
+		}
+
+		{
+			State state = new State("dead");
+			state.OnBegin += Dead_OnBegin;
+			state.OnUpdate += Dead_OnUpdate;
+
+			activity.AddState(state);
+		}
+
+		{
 			State state = new State("idle");
 			state.OnBegin += Idle_OnBegin;
 			state.OnUpdate += Idle_OnUpdate;
-			state.OnEnd += Idle_OnEnd;
 
 			locomotion.AddState(state);
 		}
@@ -49,7 +70,6 @@ public class Player : MonoBehaviour {
 			State state = new State("move");
 			state.OnBegin += Move_OnBegin;
 			state.OnUpdate += Move_OnUpdate;
-			state.OnEnd += Move_OnEnd;
 
 			locomotion.AddState(state);
 		}		
@@ -57,7 +77,15 @@ public class Player : MonoBehaviour {
 		{
 			State state = new State("crouch");
 			state.OnBegin += Crouch_OnBegin;
-			state.OnEnd += Crouch_OnEnd;
+			state.OnUpdate += Crouch_OnUpdate;
+
+			locomotion.AddState(state);
+		}
+
+		{
+			State state = new State("stunned");
+			state.OnBegin += Stunned_OnBegin;
+			state.OnUpdate += Stunned_OnUpdate;
 
 			locomotion.AddState(state);
 		}
@@ -66,7 +94,6 @@ public class Player : MonoBehaviour {
 			State state = new State("grounded");
 			state.OnBegin += Grounded_OnBegin;
 			state.OnUpdate += Grounded_OnUpdate;
-			state.OnEnd += Grounded_OnEnd;
 
 			jumping.AddState(state);
 		}
@@ -75,7 +102,6 @@ public class Player : MonoBehaviour {
 			State state = new State("hover");
 			state.OnBegin += Hover_OnBegin;
 			state.OnUpdate += Hover_OnUpdate;
-			state.OnEnd += Hover_OnEnd;
 
 			jumping.AddState(state);
 		}
@@ -84,7 +110,6 @@ public class Player : MonoBehaviour {
 			State state = new State("ceaseFire");
 			state.OnBegin += CeaseFire_OnBegin;
 			state.OnUpdate += CeaseFire_OnUpdate;
-			state.OnEnd += CeaseFire_OnEnd;
 
 			firing.AddState(state);
 		}
@@ -93,53 +118,97 @@ public class Player : MonoBehaviour {
 			State state = new State("openFire");
 			state.OnBegin += OpenFire_OnBegin;
 			state.OnUpdate += OpenFire_OnUpdate;
-			state.OnEnd += OpenFire_OnEnd;
 
 			firing.AddState(state);
 		}
 	}
 
 	void Start () {
-		
+		activity.BeginState("alive");
+	}
+	
+	// Update is called once per frame
+	void Update () {
+
+		activity.Update(Time.deltaTime);
+
+		if (activity.currentState.name == "dead") {
+		}
+		else if (activity.currentState.name == "alive") {
+
+			if (locomotion.currentState.name != "stunned") {
+
+				if (Input.GetKeyDown(inputConfig.crouch)) {
+					locomotion.BeginState("crouch");
+				}
+
+				if (Input.GetKeyUp(inputConfig.crouch)) {
+					locomotion.BeginState("idle");
+				}
+
+				if (Input.GetKeyDown(inputConfig.fire)) {
+					firing.BeginState("openFire");
+				}
+
+				if (Input.GetKeyUp(inputConfig.fire)) {
+					firing.BeginState("ceaseFire");
+				}
+			}
+
+			locomotion.Update(Time.deltaTime);
+			jumping.Update(Time.deltaTime);
+			firing.Update(Time.deltaTime);
+
+			UpdateMovement();
+			UpdateInertia();
+			UpdateCollision();
+			UpdateStunPoint();
+		}
+	}
+
+	void OnTriggerEnter(Collider other) {
+
+		Bullet bullet = other.GetComponent<Bullet>();
+
+		if (bullet != null && !bullet.isPurged) {
+			bullet.Purge();
+
+			TakeDamageFromBullet(bullet);
+		}
+	}
+
+	void Alive_OnBegin(State state) {
+
 		hitPoint = GameConfig.shared.hitPoint;
+		stunPoint = GameConfig.shared.stunPoint;
+		stunRegen = GameConfig.shared.stunRegen;
 		moveSpeed = GameConfig.shared.moveSpeed;
 		moveAccel = GameConfig.shared.moveAccel;
 		moveDecel = GameConfig.shared.moveDecel;
 		jumpPower = GameConfig.shared.jumpPower;
 		coolTime = GameConfig.shared.coolTime;
 		bulletPower = GameConfig.shared.bulletPower;
+		hitPower = GameConfig.shared.hitPoint;
+
+		currentHitPoint = hitPoint;
+		currentStunPoint = hitPoint;
+		currentMoveVelocity = 0.0f;
 
 		locomotion.BeginState("idle");
 		jumping.BeginState("grounded");
 		firing.BeginState("ceaseFire");
 	}
-	
-	// Update is called once per frame
-	void Update () {
 
-		if (Input.GetKeyDown(inputConfig.crouch)) {
-			locomotion.BeginState("crouch");
-		}
+	void Alive_OnUpdate(State state) {
 
-		if (Input.GetKeyUp(inputConfig.crouch)) {
-			locomotion.BeginState("idle");
-		}
+	}
 
-		if (Input.GetKeyDown(inputConfig.fire)) {
-			firing.BeginState("openFire");
-		}
+	void Dead_OnBegin(State state) {
 
-		if (Input.GetKeyUp(inputConfig.fire)) {
-			firing.BeginState("ceaseFire");
-		}
+	}
 
-		locomotion.Update(Time.deltaTime);
-		jumping.Update(Time.deltaTime);
-		firing.Update(Time.deltaTime);
+	void Dead_OnUpdate(State state) {
 
-		UpdateMovement();
-		UpdateInertia();
-		UpdateCollision();
 	}
 
 	void Idle_OnBegin(State state) {
@@ -150,14 +219,14 @@ public class Player : MonoBehaviour {
 
 		bool moveLeft = Input.GetKey(inputConfig.moveLeft);
 		bool moveRight = Input.GetKey(inputConfig.moveRight);
+		bool crouch = Input.GetKey(inputConfig.crouch);
 		
-		if (moveLeft || moveRight) {
+		if (crouch) {
+			locomotion.BeginState("crouch");
+		}
+		else if (moveLeft || moveRight) {
 			locomotion.BeginState("move");
 		}
-	}
-
-	void Idle_OnEnd(State state) {
-
 	}
 
 	void Move_OnBegin(State state) {
@@ -168,8 +237,12 @@ public class Player : MonoBehaviour {
 
 		bool moveLeft = Input.GetKey(inputConfig.moveLeft);
 		bool moveRight = Input.GetKey(inputConfig.moveRight);
+		bool crouch = Input.GetKey(inputConfig.crouch);
 		
-		if (moveLeft && moveRight) {
+		if (crouch) {
+			locomotion.BeginState("crouch");
+		}
+		else if (moveLeft && moveRight) {
 			// Pressing both keys. Do nothing
 		}
 		else if (moveLeft) {
@@ -183,16 +256,31 @@ public class Player : MonoBehaviour {
 		}
 	}
 
-	void Move_OnEnd(State state) {
-
-	}
-
 	void Crouch_OnBegin(State state) {
 
 	}
 
-	void Crouch_OnEnd(State state) {
+	void Crouch_OnUpdate(State state) {
 
+		// if (state.elapsedTime > 1.5f) {
+		// 	locomotion.BeginState("idle");
+		// 	jumping.BeginState("hover");
+		// }
+
+		if (Input.GetKeyUp(inputConfig.crouch)) {
+			locomotion.BeginState("idle");
+		}
+	}
+
+	void Stunned_OnBegin(State state) {
+		firing.BeginState("ceaseFire");
+	}
+
+	void Stunned_OnUpdate(State state) {
+
+		if (currentStunPoint > stunPoint * 0.2f) {
+			locomotion.BeginState("idle");
+		}
 	}
 
 	void Grounded_OnBegin(State state) {
@@ -211,10 +299,6 @@ public class Player : MonoBehaviour {
 		}
 	}
 
-	void Grounded_OnEnd(State state) {
-
-	}
-
 	void Hover_OnBegin(State state) {
 		
 	}
@@ -226,43 +310,28 @@ public class Player : MonoBehaviour {
 		}
 	}
 
-	void Hover_OnEnd(State state) {
-
-	}
-
 	void CeaseFire_OnBegin(State state) {
 
 	}
 
 	void CeaseFire_OnUpdate(State state) {
 		
-		if (Input.GetKeyDown(inputConfig.fire)) {
-			firing.BeginState("openFire");
-		}
-	}
-
-	void CeaseFire_OnEnd(State state) {
-
 	}
 
 	void OpenFire_OnBegin(State state) {
-		InstantiateBullet();
+		ShootBullet();
 	}
 
 	void OpenFire_OnUpdate(State state) {
 
 		if (state.elapsedTime > coolTime) {
-			InstantiateBullet();
+			ShootBullet();
 			state.ResetTime();
 		}
 
 		if (Input.GetKeyUp(inputConfig.fire)) {
 			firing.BeginState("ceaseFire");
 		}
-	}
-
-	void OpenFire_OnEnd(State state) {
-
 	}
 
 	bool CheckGrounded() {
@@ -336,7 +405,13 @@ public class Player : MonoBehaviour {
 		}
 	}
 
-	private void InstantiateBullet() {
+	void UpdateStunPoint() {
+
+		currentStunPoint += stunRegen * Time.deltaTime;
+		currentStunPoint = Mathf.Min(currentStunPoint, stunPoint);
+	}
+
+	private void ShootBullet() {
 
 		Vector3 origin = transform.position + Vector3.up * 0.5f;
 		Vector3 direction = Vector3.zero;
@@ -352,5 +427,24 @@ public class Player : MonoBehaviour {
 
 		GameObject go = GameObject.Instantiate(bulletPrefab.gameObject, origin, Quaternion.identity);
 		go.GetComponent<Rigidbody>().AddForce(direction * bulletPower);
+
+		if (Random.Range(0.0f, 1.0f) < GameConfig.shared.itemChance) {
+			go.GetComponent<Bullet>().item = new Item();
+		}
+	}
+
+	private void TakeDamageFromBullet(Bullet bullet) {
+
+		currentHitPoint -= bullet.bulletDamage;
+
+		if (currentHitPoint <= 0.0f) {
+			activity.BeginState("dead");
+		}
+
+		currentStunPoint -= bullet.bulletStunDamage;
+		
+		if (currentStunPoint <= 0.0f) {
+			locomotion.BeginState("stunned");
+		}
 	}
 }

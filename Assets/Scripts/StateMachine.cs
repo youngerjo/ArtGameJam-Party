@@ -46,7 +46,7 @@ public class StateMachine  {
 			return;
 		}
 
-		Debug.Log(string.Format("Begin {0}", state.name));
+		// Debug.Log(string.Format("Begin {0}", state.name));
 
 		state.Begin();
 	}
@@ -66,7 +66,7 @@ public class StateMachine  {
 			return;
 		}
 
-		Debug.Log(string.Format("End {0}", state.name));
+		// Debug.Log(string.Format("End {0}", state.name));
 
 		state.End();
 	}

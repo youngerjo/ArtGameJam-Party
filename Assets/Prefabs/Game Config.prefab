@@ -113,6 +113,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gravity: 100
   hitPoint: 100
+  stunPoint: 100
+  stunRegen: 100
   moveSpeed: 10
   moveAccel: 50
   moveDecel: 20
@@ -120,6 +122,10 @@ MonoBehaviour:
   coolTime: 0.2
   bulletPower: 2000
   bulletLife: 1
+  bulletDamage: 2
+  bulletStunDamage: 25
+  hitPower: 0
+  itemChance: 0.1
 --- !u!114 &114550347201050290
 MonoBehaviour:
   m_ObjectHideFlags: 1
