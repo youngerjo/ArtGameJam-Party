@@ -429,6 +429,12 @@ public class Player : MonoBehaviour {
 
 	void CeaseFire_OnBegin(State state) {
         animator.SetBool("stopfire", true);
+
+		string layerName = LayerMask.LayerToName(gameObject.layer);
+		string notificationName = layerName + "EndFire";
+
+		Notification notification = new Notification(notificationName, null);
+		NotificationCenter.shared.PostNotification(notification);
     }
 
 	void CeaseFire_OnUpdate(State state) {
@@ -439,6 +445,12 @@ public class Player : MonoBehaviour {
         animator.SetBool("stopfire", false);
         //animator.SetTrigger("fire");
 		ShootBullet();
+
+		string layerName = LayerMask.LayerToName(gameObject.layer);
+		string notificationName = layerName + "BeginFire";
+
+		Notification notification = new Notification(notificationName, null);
+		NotificationCenter.shared.PostNotification(notification);
 	}
 
 	void OpenFire_OnUpdate(State state) {

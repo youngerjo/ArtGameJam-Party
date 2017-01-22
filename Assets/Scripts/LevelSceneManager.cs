@@ -111,6 +111,10 @@ public class LevelSceneManager : MonoBehaviour {
         NotificationCenter.shared.AddHandler("DoorOn", DoorOn);
         NotificationCenter.shared.AddHandler("PlayerEnterColorDoor", EnterDoor);
         NotificationCenter.shared.AddHandler("Background_Change_Degree", BackgroundChange);
+        NotificationCenter.shared.AddHandler("Player1BeginFire", OnPlayer1BeginFire);
+        NotificationCenter.shared.AddHandler("Player1EndFire", OnPlayer1EndFire);
+        NotificationCenter.shared.AddHandler("Player2BeginFire", OnPlayer2BeginFire);
+        NotificationCenter.shared.AddHandler("Player2EndFire", OnPlayer2EndFire);
 
         game.BeginState("ready");
 		gate.BeginState("closed");
@@ -131,6 +135,10 @@ public class LevelSceneManager : MonoBehaviour {
         SoundPlayer.shared.Play("GamePlay_BGM_1", false);
         SoundPlayer.shared.Play("GamePlay_BGM_2", true);
         SoundPlayer.shared.Play("GamePlay_BGM_3", true);
+
+        SoundGroup voices = new SoundGroup("voice1", "voice2", "voice3", "voice4", "voice5", "voice7");
+        SoundPlayer.shared.RegisterGroup("Player1_Voices", voices);
+        SoundPlayer.shared.RegisterGroup("Player2_Voices", voices);
 
         tension.BeginState("low");
 
@@ -263,6 +271,22 @@ public class LevelSceneManager : MonoBehaviour {
 		player2HpBar.SetValue(hitPointRatio);
 
         UpdateTension(hitPointRatio);
+    }
+
+    void OnPlayer1BeginFire(Notification notification) {
+        SoundPlayer.shared.PlayRandomSequence("Player1_Voices");
+    }
+
+    void OnPlayer1EndFire(Notification notification) {
+        SoundPlayer.shared.Stop("Player1_Voices");
+    }
+
+    void OnPlayer2BeginFire(Notification notification) {
+        SoundPlayer.shared.PlayRandomSequence("Player2_Voices");
+    }
+
+    void OnPlayer2EndFire(Notification notification) {
+        SoundPlayer.shared.Stop("Player2_Voices");
     }
 
     void UpdateTension(float hitPointRatio) {

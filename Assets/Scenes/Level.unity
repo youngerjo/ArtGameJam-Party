@@ -2147,19 +2147,10 @@ Prefab:
       propertyPath: m_RootOrder
       value: 4
       objectReference: {fileID: 0}
-    - target: {fileID: 1706856294205380, guid: d264510d1ff404c6a8be701d54d1982f, type: 2}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 114165391085613452, guid: d264510d1ff404c6a8be701d54d1982f,
         type: 2}
       propertyPath: itemChance
-      value: 0.05
-      objectReference: {fileID: 0}
-    - target: {fileID: 114165391085613452, guid: d264510d1ff404c6a8be701d54d1982f,
-        type: 2}
-      propertyPath: bulletStunDamage
-      value: 8
+      value: 0.1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: d264510d1ff404c6a8be701d54d1982f, type: 2}
@@ -3434,6 +3425,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 871cd9eba73f840d0b1a815def26aba4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  audioClips:
+  - {fileID: 8300000, guid: c5c68b356b9984c479ba17d1361ec1d7, type: 3}
+  - {fileID: 8300000, guid: 9adaa5559d6954dcd85665f36e224e05, type: 3}
+  - {fileID: 8300000, guid: aedb011c39f2f4468862430e031d3b1c, type: 3}
+  - {fileID: 8300000, guid: 5a823e989787c4f8392626dfa3151c5f, type: 3}
+  - {fileID: 8300000, guid: d50270ff63b1c47a699f5675fe070b69, type: 3}
 --- !u!4 &1778673877
 Transform:
   m_ObjectHideFlags: 0

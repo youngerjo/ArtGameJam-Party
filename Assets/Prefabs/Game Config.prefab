@@ -122,10 +122,10 @@ MonoBehaviour:
   coolTime: 0.05
   bulletPower: 600
   bulletLife: 2
-  bulletDamage: 0.5
-  bulletStunDamage: 25
+  bulletDamage: 2
+  bulletStunDamage: 8
   hitPower: 0
-  itemChance: 0.01
+  itemChance: 0.1
   hitDelay: 0.25
 --- !u!114 &114550347201050290
 MonoBehaviour:
