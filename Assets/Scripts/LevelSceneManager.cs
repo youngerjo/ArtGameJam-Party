@@ -18,6 +18,11 @@ public class LevelSceneManager : MonoBehaviour {
     public Renderer BG_L;
     public Renderer BG_R;
     public Renderer darkfilter;
+    public SpriteRenderer player1end;
+    public SpriteRenderer player2end;
+
+    public GameObject UI;
+    public GameObject Terrain;
 
 	private StateMachine game = new StateMachine();
 	private StateMachine gate = new StateMachine();
@@ -175,8 +180,9 @@ public class LevelSceneManager : MonoBehaviour {
 	void Over_OnBegin(State state) {
         StartCoroutine(AlphaOff(Bluedoor));
         StartCoroutine(AlphaOff(Pinkdoor));
-
-	}
+        Bluedoor.gameObject.GetComponent<Collider>().enabled = false;
+        Pinkdoor.gameObject.GetComponent<Collider>().enabled = false;
+    }
 
 	void Over_OnUpdate(State state) {
         if (state.elapsedTime > 1f)
@@ -227,6 +233,22 @@ public class LevelSceneManager : MonoBehaviour {
 
         StartCoroutine(AlphaOff(Bluedoor));
         StartCoroutine(AlphaOff(Pinkdoor));
+
+        GameObject player1 = GameObject.Find("Player1");
+        GameObject player2 = GameObject.Find("Player2");
+
+        player1.GetComponent<Player>().enabled = false;
+        player2.GetComponent<Player>().enabled = false;
+        player1.GetComponent<CharacterController>().enabled = false;
+        player2.GetComponent<CharacterController>().enabled = false;
+
+        StartCoroutine(SpriteAlphaOff(player1.transform.FindChild("Sprite").GetComponent<SpriteRenderer>()));
+        StartCoroutine(SpriteAlphaOff(player2.transform.FindChild("Sprite").GetComponent<SpriteRenderer>()));
+        StartCoroutine(SpriteAlphaOn(player1end));
+        StartCoroutine(SpriteAlphaOn(player2end));
+
+        UI.SetActive(false);
+        Terrain.SetActive(false);
     }
 
     void GateUtopia_OnUpdate(State state)
@@ -235,6 +257,9 @@ public class LevelSceneManager : MonoBehaviour {
         {
             BG_L.transform.position -= new Vector3(5 * Time.deltaTime, 0, 0);
             BG_R.transform.position += new Vector3(5 * Time.deltaTime, 0, 0);
+            Vector3 dir = new Vector3(0, -1, 7).normalized;
+            player1end.transform.position += dir * 5 * Time.deltaTime;
+            player2end.transform.position += dir * 5 * Time.deltaTime;
         }
         else {
             Application.LoadLevel("Utopia");
@@ -447,4 +472,24 @@ public class LevelSceneManager : MonoBehaviour {
         }
     }
 
+    IEnumerator SpriteAlphaOff(SpriteRenderer R)
+    {
+        float a = 1.0f;
+        while (a > 0)
+        {
+            a -= Time.deltaTime;
+            R.color = new Color(1.0f, 1.0f, 1.0f, a);
+            yield return null;
+        }
+    }
+    IEnumerator SpriteAlphaOn(SpriteRenderer R)
+    {
+        float a = 0.0f;
+        while (a < 1)
+        {
+            a += Time.deltaTime;
+            R.color = new Color(1.0f, 1.0f, 1.0f, a);
+            yield return null;
+        }
+    }
 }
