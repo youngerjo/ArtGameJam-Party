@@ -34,6 +34,8 @@ public class Player : MonoBehaviour {
 	private float currentCoolTime = 0.0f;
 	private Vector3 inertia = Vector3.zero;
 
+    private bool jumpenabled=true;
+
 	private StateMachine activity = new StateMachine();
 	private StateMachine locomotion = new StateMachine();
 	private StateMachine jumping = new StateMachine();
@@ -145,7 +147,9 @@ public class Player : MonoBehaviour {
 
 	void Start () {
 		activity.BeginState("alive");
-	}
+
+        NotificationCenter.shared.AddHandler("ResetGame", ResetOnGameOver_repeat);
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -200,44 +204,93 @@ public class Player : MonoBehaviour {
 		if (bullet != null && !bullet.isPurged) {
 			bullet.Purge();
 
-			TakeDamageFromBullet(bullet);
+            if (locomotion.currentState.name == "stunned")
+            {
+                if (locomotion.currentState.elapsedTime > 1.5f)
+                {
+                    TakeDamageFromBullet(bullet);
+                }
+            }
+            else
+            {
+                TakeDamageFromBullet(bullet);
+            }
+			
 		}
-	}
 
-	void Alive_OnBegin(State state) {
+    }
 
-		hitPoint = GameConfig.shared.hitPoint;
-		stunPoint = GameConfig.shared.stunPoint;
-		stunRegen = GameConfig.shared.stunRegen;
-		moveSpeed = GameConfig.shared.moveSpeed;
-		moveAccel = GameConfig.shared.moveAccel;
-		moveDecel = GameConfig.shared.moveDecel;
-		jumpPower = GameConfig.shared.jumpPower;
-		coolTime = GameConfig.shared.coolTime;
-		bulletPower = GameConfig.shared.bulletPower;
-		hitPower = GameConfig.shared.hitPoint;
+    void OnTriggerStay(Collider other)
+    {
+        if (LayerMask.LayerToName(gameObject.layer) + "door" == other.name )
+        {
+            jumpenabled = false;
+            if(Input.GetKey(inputConfig.jump)&&jumping.currentState.name!="hover"){
+                Notification notification = new Notification("PlayerEnterColorDoor", LayerMask.LayerToName(gameObject.layer));
+                NotificationCenter.shared.PostNotification(notification);
+                animator.SetBool("door", true);
+            }
+        }
+    }
 
-		currentHitPoint = hitPoint;
-		currentStunPoint = hitPoint;
-		currentMoveVelocity = 0.0f;
-		currentCoolTime = coolTime;
+    void OnTriggerExit(Collider other)
+    {
+        if(LayerMask.LayerToName(gameObject.layer) + "door" == other.name)
+        {
+            jumpenabled = true;
+        }
+    }
 
-		locomotion.BeginState("idle");
-		jumping.BeginState("grounded");
-		firing.BeginState("ceaseFire");
+    private void ResetPlayer()
+    {
+        hitPoint = GameConfig.shared.hitPoint;
+        stunPoint = GameConfig.shared.stunPoint;
+        stunRegen = GameConfig.shared.stunRegen;
+        moveSpeed = GameConfig.shared.moveSpeed;
+        moveAccel = GameConfig.shared.moveAccel;
+        moveDecel = GameConfig.shared.moveDecel;
+        jumpPower = GameConfig.shared.jumpPower;
+        coolTime = GameConfig.shared.coolTime;
+        bulletPower = GameConfig.shared.bulletPower;
+        hitPower = GameConfig.shared.hitPoint;
+
+        currentHitPoint = hitPoint;
+        currentStunPoint = hitPoint;
+        currentMoveVelocity = 0.0f;
+        currentCoolTime = coolTime;
+
+
+        locomotion.BeginState("idle");
+        jumping.BeginState("grounded");
+        firing.BeginState("ceaseFire");
         gettinghit.BeginState("notHit");
-	}
+    }
 
-	void Alive_OnUpdate(State state) {
+    void Alive_OnBegin(State state)
+    {
+        ResetPlayer();
+    }
+        
+
+    void Alive_OnUpdate(State state) {
 
 	}
 
 	void Dead_OnBegin(State state) {
-
+        animator.SetBool("dead", true);
 	}
 
 	void Dead_OnUpdate(State state) {
-
+        if (state.elapsedTime > 1f)
+        {
+            animator.SetBool("dead", false);
+            animator.SetBool("idle", false);
+            animator.SetBool("stun", false);
+            animator.SetBool("hover", false);
+            animator.SetBool("stopfire", true);
+            animator.SetBool("jump", false);
+            activity.BeginState("alive");// Do level initialization
+        }
 	}
 
 	void Idle_OnBegin(State state) {
@@ -318,12 +371,15 @@ public class Player : MonoBehaviour {
 
 	void Stunned_OnBegin(State state) {
 		firing.BeginState("ceaseFire");
+        animator.SetBool("stun", true);
 	}
 
 	void Stunned_OnUpdate(State state) {
 
-		if (currentStunPoint > stunPoint * 0.2f) {
+		if (state.elapsedTime>3f) {// currentStunPoint > stunPoint * 0.2f) {
+            animator.SetBool("stun", false);
 			locomotion.BeginState("idle");
+            currentStunPoint = stunPoint;
 		}
 	}
 
@@ -341,7 +397,7 @@ public class Player : MonoBehaviour {
             animator.SetBool("idle", false);
         }
 
-		if (Input.GetKeyDown(inputConfig.jump) && state.elapsedTime > 0.1f) {
+		if (Input.GetKeyDown(inputConfig.jump) && state.elapsedTime > 0.1f&&locomotion.currentState.name !="stunned" && jumpenabled) {
             
 			inertia += Vector3.up * jumpPower;
 			jumping.BeginState("hover");
@@ -533,6 +589,7 @@ public class Player : MonoBehaviour {
 
 		if (Random.Range(0.0f, 1.0f) < GameConfig.shared.itemChance) {
 			go.GetComponent<Bullet>().item = new Item();
+           
 		}
 	}
 
@@ -544,14 +601,20 @@ public class Player : MonoBehaviour {
 
 		currentHitPoint -= bullet.bulletDamage;
 
-		if (currentHitPoint <= 0.0f) {
-			activity.BeginState("dead");
-		}
+        string playerName = LayerMask.LayerToName(gameObject.layer);
+
+        if (currentHitPoint <= 0.0f) {
+            Notification notification = new Notification("ResetGame", LayerMask.LayerToName(gameObject.layer));
+            NotificationCenter.shared.PostNotification(notification);
+            Debug.Log("Game.Over.Begin");
+            return;
+            //activity.BeginState("dead");
+        }
 		else {
 			gettinghit.BeginState("getHit");
 		}
 
-		string playerName = LayerMask.LayerToName(gameObject.layer);
+		
 
 		{
 			string notificationName = playerName + "Hit";
@@ -574,4 +637,27 @@ public class Player : MonoBehaviour {
 			locomotion.BeginState("stunned");
 		}
 	}
+     void ResetOnGameOver_repeat(Notification notification)
+    {
+        string playerName = LayerMask.LayerToName(gameObject.layer);
+        {
+            string notificationName = playerName + "Hit";
+
+
+            Notification _notification = new Notification(notificationName, 1f);
+            NotificationCenter.shared.PostNotification(_notification);
+        }
+
+
+        string playernum = (string)notification.userInfo;
+        if (playernum == LayerMask.LayerToName(gameObject.layer))
+        {
+            activity.BeginState("dead");
+        }else
+        {
+            ResetPlayer();
+        }
+        
+    }
+
 }
