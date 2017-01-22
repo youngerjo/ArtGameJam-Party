@@ -87,6 +87,20 @@ public class LevelSceneManager : MonoBehaviour {
 		}
 
         {
+            State state = new State("utopia2");
+            state.OnBegin += GateUtopia2_OnBegin;
+            state.OnUpdate += GateUtopia2_OnUpdate;
+            gate.AddState(state);
+        }
+
+        {
+            State state = new State("utopia3");
+            state.OnBegin += GateUtopia3_OnBegin;
+            state.OnUpdate += GateUtopia3_OnUpdate;
+            gate.AddState(state);
+        }
+
+        {
             State state = new State("low");
             state.OnBegin += TensionLow_OnBegin;
             tension.AddState(state);
@@ -250,25 +264,76 @@ public class LevelSceneManager : MonoBehaviour {
 
         UI.SetActive(false);
         Terrain.SetActive(false);
-        SoundPlayer.shared.Play("Outro2");
+
 
     }
 
     void GateUtopia_OnUpdate(State state)
     {
+        if (player1end.transform.GetComponent<Animator>().GetBool("state")==false)
+        {
+            if (state.elapsedTime > 3f)
+            {
+                player1end.transform.GetComponent<Animator>().SetBool("state", true);
+                player2end.transform.GetComponent<Animator>().SetBool("state", true);
+                SoundPlayer.shared.Play("Outro2");
+            }
+        }
+        else if (player1end.transform.position.x > 1.1)
+        {
+            player1end.transform.position -= 4 * Time.deltaTime * new Vector3(1f, 0, 0);
+            player2end.transform.position += 4 * Time.deltaTime * new Vector3(1f, 0, 0);
+        }else
+        {
+            player1end.transform.GetComponent<Animator>().SetBool("state", false);
+            player2end.transform.GetComponent<Animator>().SetBool("state", false);
+            gate.BeginState("utopia2");
+        }
+
+
+
+    }
+
+    void GateUtopia2_OnBegin(State state)
+    {
+
+    }
+
+    void GateUtopia2_OnUpdate(State state)
+    {
+        if (BG_L.transform.position.x > -60.0f)
+        {
+            BG_L.transform.position -= new Vector3(5 * Time.deltaTime, 0, 0);
+            BG_R.transform.position += new Vector3(5 * Time.deltaTime, 0, 0);
+
+        }
+        else
+        {
+            player1end.transform.GetComponent<Animator>().SetBool("state", true);
+            player2end.transform.GetComponent<Animator>().SetBool("state", true);
+            gate.BeginState("utopia3");
+        }
+    }
+
+    void GateUtopia3_OnBegin(State state)
+    {
+
+    }
+
+    void GateUtopia3_OnUpdate(State state)
+    {
         if (BG_L.transform.position.x > -150.0f)
         {
             BG_L.transform.position -= new Vector3(5 * Time.deltaTime, 0, 0);
             BG_R.transform.position += new Vector3(5 * Time.deltaTime, 0, 0);
-            Vector3 dir = new Vector3(0, -1, 7).normalized;
-            player1end.transform.position += dir * 5 * Time.deltaTime;
-            player2end.transform.position += dir * 5 * Time.deltaTime;
+
         }
-        else {
+        if (state.elapsedTime >14f)
+        {
             Application.LoadLevel("Credit");
         }
     }
-    
+
     void TensionLow_OnBegin(State state) {
         SoundPlayer.shared.SetSourceVolume("GamePlay_BGM_1", 1.0f);
         SoundPlayer.shared.SetSourceVolume("GamePlay_BGM_2", 0.0f);
