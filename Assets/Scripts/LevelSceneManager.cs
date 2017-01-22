@@ -162,7 +162,7 @@ public class LevelSceneManager : MonoBehaviour {
     {
         if (state.elapsedTime > 1f)
         {
-           // TODO scene change player 1 falling
+           Application.LoadLevel("Player1Win");
         }
     }
 
@@ -175,7 +175,7 @@ public class LevelSceneManager : MonoBehaviour {
     {
         if (state.elapsedTime > 1f)
         {
-            // TODO scene change player 2 falling
+            Application.LoadLevel("Player2Win");
         }
     }
 
@@ -192,9 +192,10 @@ public class LevelSceneManager : MonoBehaviour {
         {
             BG_L.transform.position -= new Vector3(5 * Time.deltaTime, 0, 0);
             BG_R.transform.position += new Vector3(5 * Time.deltaTime, 0, 0);
-        }//moving background 
-        // TODO move to credit scene
-
+        }
+        else {
+            Application.LoadLevel("Utopia");
+        }
     }
     
 
