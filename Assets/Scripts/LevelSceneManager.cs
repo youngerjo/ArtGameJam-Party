@@ -234,7 +234,7 @@ public class LevelSceneManager : MonoBehaviour {
         StartCoroutine(AlphaOff(Bluedoor));
         StartCoroutine(AlphaOff(Pinkdoor));
 
-<<<<<<< HEAD
+
         GameObject player1 = GameObject.Find("Player1");
         GameObject player2 = GameObject.Find("Player2");
 
@@ -250,9 +250,8 @@ public class LevelSceneManager : MonoBehaviour {
 
         UI.SetActive(false);
         Terrain.SetActive(false);
-=======
         SoundPlayer.shared.Play("Outro2");
->>>>>>> origin/master
+
     }
 
     void GateUtopia_OnUpdate(State state)
