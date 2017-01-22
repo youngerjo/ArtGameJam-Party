@@ -70,13 +70,31 @@ public class Bullet : MonoBehaviour {
 	}
 
 	void Grow_OnBegin(State state) {
-
-		_growingDuration = Random.Range(0.2f, 0.5f);
+        Color color;
+        _growingDuration = Random.Range(0.2f, 0.5f);
 		_flyingRotation = Random.Range(-180.0f, 180.0f);
 		_flyingIntensity = Random.Range(0.0f, 1.0f);
+        if (item != null)
+        {
+            if (item.colorType == Item.ColorType.Blue)
+            {
+                color = new Color(.0f, .0f, 1.0f, _flyingIntensity);
+                renderingObject.GetComponent<Renderer>().material.SetColor("_TintColor", color);
+            }
+            else if (item.colorType == Item.ColorType.Purle)
+            {
+                color = new Color(1.0f, .0f, 1.0f, _flyingIntensity);
+                renderingObject.GetComponent<Renderer>().material.SetColor("_TintColor", color);
+            }
+            else if (item.colorType == Item.ColorType.Green)
+            {
+                color = new Color(.0f, 1.0f, .0f, _flyingIntensity);
+                renderingObject.GetComponent<Renderer>().material.SetColor("_TintColor", color);
+            }
+        }
 
-		Color color = new Color(1.0f, 1.0f, 1.0f, _flyingIntensity);
-		renderingObject.GetComponent<Renderer>().material.SetColor("_TintColor", color);
+		
+		
 		renderingObject.transform.localScale = Vector3.one * 0.5f;
 	}
 
