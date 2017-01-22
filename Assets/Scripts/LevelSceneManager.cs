@@ -181,9 +181,16 @@ public class LevelSceneManager : MonoBehaviour {
 
     void GateUtopia_OnBegin(State state) {
 		Debug.Log("Gate.Utopia.Begin");
-        Background.material.SetColor("_TintColor",new Color(1.0f, 1.0f, 1.0f, 0.0f));
-        BG_L.material.SetColor("_TintColor", new Color(.5f, .5f, .5f, 0.5f));
-        BG_R.material.SetColor("_TintColor", new Color(.5f, .5f, .5f, 0.5f));
+
+        Background.enabled = false;
+        BG_L.enabled = true;
+        BG_R.enabled = true;
+
+        Bluedoor.gameObject.GetComponent<Collider>().enabled = false;
+        Pinkdoor.gameObject.GetComponent<Collider>().enabled = false;
+
+        StartCoroutine(AlphaOff(Bluedoor));
+        StartCoroutine(AlphaOff(Pinkdoor));
     }
 
     void GateUtopia_OnUpdate(State state)

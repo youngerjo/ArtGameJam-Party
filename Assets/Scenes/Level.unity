@@ -177,7 +177,7 @@ MeshRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 14813355}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_MotionVectors: 1
@@ -2852,7 +2852,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aff852f2e3e9e134eba9f972e5731026, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playernum: 1
 --- !u!114 &1213883221 stripped
 MonoBehaviour:
   m_PrefabParentObject: {fileID: 114748776873474104, guid: d264510d1ff404c6a8be701d54d1982f,
@@ -3649,7 +3648,7 @@ MeshRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1826684438}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_MotionVectors: 1
@@ -3810,7 +3809,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aff852f2e3e9e134eba9f972e5731026, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playernum: 2
 --- !u!1 &1927165832
 GameObject:
   m_ObjectHideFlags: 0
