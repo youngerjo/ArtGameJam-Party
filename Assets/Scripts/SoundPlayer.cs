@@ -13,17 +13,28 @@ public class SoundPlayer : MonoBehaviour {
 		audioSources = GetComponentsInChildren<AudioSource>();
 	}
 
-	public void Play(string name) {
+	public void Play(string name, bool overlapped = false) {
 
-		foreach (AudioSource audioSource in audioSources) {
-			if (audioSource.loop && audioSource.name != name) {
-				audioSource.Stop();
+		if (! overlapped) {
+			foreach (AudioSource audioSource in audioSources) {
+				if (audioSource.loop && audioSource.name != name) {
+					audioSource.Stop();
+				}
 			}
 		}
 		
 		foreach (AudioSource audioSource in audioSources) {
 			if (audioSource.clip.name == name) {
 				audioSource.Play();
+			}
+		}
+	}
+
+	public void SetSourceVolume(string name, float volume) {
+
+		foreach (AudioSource audioSource in audioSources) {
+			if (audioSource.clip.name == name) {
+				audioSource.volume = volume;
 			}
 		}
 	}

@@ -22,6 +22,8 @@ public class LevelSceneManager : MonoBehaviour {
 	private StateMachine game = new StateMachine();
 	private StateMachine gate = new StateMachine();
 
+    private StateMachine tension = new StateMachine();
+
     private bool onedooron;
 
 	private int itemCount = 0;
@@ -78,6 +80,24 @@ public class LevelSceneManager : MonoBehaviour {
             state.OnUpdate += GateUtopia_OnUpdate;
 			gate.AddState(state);
 		}
+
+        {
+            State state = new State("low");
+            state.OnBegin += TensionLow_OnBegin;
+            tension.AddState(state);
+        }
+
+        {
+            State state = new State("medium");
+            state.OnBegin += TensionMedium_OnBegin;
+            tension.AddState(state);
+        }
+
+        {
+            State state = new State("high");
+            state.OnBegin += TensionHigh_OnBegin;
+            tension.AddState(state);
+        }
 	}
 
 	void Start () {
@@ -94,6 +114,7 @@ public class LevelSceneManager : MonoBehaviour {
 
         game.BeginState("ready");
 		gate.BeginState("closed");
+        tension.BeginState("low");
 	}
 	
 	// Update is called once per frame
@@ -106,6 +127,14 @@ public class LevelSceneManager : MonoBehaviour {
 		Debug.Log("Game.Ready.Begin");
         Color color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
         readyRenderer.material.SetColor("_TintColor", color);
+
+        SoundPlayer.shared.Play("GamePlay_BGM_1", false);
+        SoundPlayer.shared.Play("GamePlay_BGM_2", true);
+        SoundPlayer.shared.Play("GamePlay_BGM_3", true);
+
+        tension.BeginState("low");
+
+        StartCoroutine(AlphatoDest(darkfilter, 0.03f));
     }
 
     void Ready_OnUpdate(State state)
@@ -122,7 +151,6 @@ public class LevelSceneManager : MonoBehaviour {
             readyRenderer.material.SetColor("_TintColor", color);
             game.BeginState("play");
         }
-
     }
 
 	void Play_OnBegin(State state) {
@@ -205,17 +233,46 @@ public class LevelSceneManager : MonoBehaviour {
         }
     }
     
+    void TensionLow_OnBegin(State state) {
+        SoundPlayer.shared.SetSourceVolume("GamePlay_BGM_1", 1.0f);
+        SoundPlayer.shared.SetSourceVolume("GamePlay_BGM_2", 0.0f);
+        SoundPlayer.shared.SetSourceVolume("GamePlay_BGM_3", 0.0f);
+    }
+
+    void TensionMedium_OnBegin(State state) {
+        SoundPlayer.shared.SetSourceVolume("GamePlay_BGM_1", 0.0f);
+        SoundPlayer.shared.SetSourceVolume("GamePlay_BGM_2", 1.0f);
+        SoundPlayer.shared.SetSourceVolume("GamePlay_BGM_3", 0.0f);
+    }
+
+    void TensionHigh_OnBegin(State state) {
+        SoundPlayer.shared.SetSourceVolume("GamePlay_BGM_1", 0.0f);
+        SoundPlayer.shared.SetSourceVolume("GamePlay_BGM_2", 0.0f);
+        SoundPlayer.shared.SetSourceVolume("GamePlay_BGM_3", 1.0f);
+    }
 
 	void OnPlayer1Hit(Notification notification) {
 		float hitPointRatio = (float)notification.userInfo;
 		player1HpBar.SetValue(hitPointRatio);
 
-	}
+        UpdateTension(hitPointRatio);	
+    }
 
 	void OnPlayer2Hit(Notification notification) {
 		float hitPointRatio = (float)notification.userInfo;
 		player2HpBar.SetValue(hitPointRatio);
 
+        UpdateTension(hitPointRatio);
+    }
+
+    void UpdateTension(float hitPointRatio) {
+
+        if (tension.currentState.name == "medium" && hitPointRatio < 0.33f) {
+            tension.BeginState("high");
+        }
+        else if (tension.currentState.name == "low" && hitPointRatio < 0.66f) {
+            tension.BeginState("medium");
+        }
     }
 
 	void OnPlayer1GetItem(Notification notification) {
