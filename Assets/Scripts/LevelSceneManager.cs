@@ -227,6 +227,8 @@ public class LevelSceneManager : MonoBehaviour {
 
         StartCoroutine(AlphaOff(Bluedoor));
         StartCoroutine(AlphaOff(Pinkdoor));
+
+        SoundPlayer.shared.Play("Outro2");
     }
 
     void GateUtopia_OnUpdate(State state)
@@ -237,7 +239,7 @@ public class LevelSceneManager : MonoBehaviour {
             BG_R.transform.position += new Vector3(5 * Time.deltaTime, 0, 0);
         }
         else {
-            Application.LoadLevel("Utopia");
+            Application.LoadLevel("Credit");
         }
     }
     
